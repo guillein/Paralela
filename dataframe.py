@@ -23,6 +23,7 @@ import shapely
 from shapely import geometry
 from matplotlib.collections import PatchCollection, LineCollection
 from descartes.patch import PolygonPatch
+import matplotlib.pyplot as plt
     
 if sys.version >= '3':
     basestring = unicode = str
