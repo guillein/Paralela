@@ -2290,6 +2290,9 @@ class DataFrame(PandasMapOpsMixin, PandasConversionMixin):
         # Damos soporte a estas figuras geométricas de Shapely
         objetos_geom = {"POLYGON" : self.__plot_poly, "LINESTRING" : self.__plot_linestring, "POINT" : self.__plot_point}
 
+        # Extraemos los objetos geométricos de la columna geometry
+        objetos = self.select("geometry").rdd.map(lambda x : (x[0].split('(')[0].upper().strip(), [shapely.wkt.loads(x[0])]))
+
         # Separamos los objetos por su tipo
         objetos = objetos.reduceByKey(lambda x, y : x+y)
 
