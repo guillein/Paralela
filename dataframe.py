@@ -2210,6 +2210,11 @@ class DataFrame(PandasMapOpsMixin, PandasConversionMixin):
     """
     Código propio. @Grupo 3.3
     """
+    from pyproj import CRS, Transformer
+    import shapely
+    from shapely import geometry
+    from matplotlib.collections import PatchCollection, LineCollection
+    from descartes.patch import PolygonPatch
 
     def __setitem__(self, ind, valor):
         # Permitimos la asignación y creación de columnas mediante índices
@@ -2283,12 +2288,8 @@ class DataFrame(PandasMapOpsMixin, PandasConversionMixin):
             fig, ax = plt.subplots()
 
         # Damos soporte a estas figuras geométricas de Shapely
-        objetos_geom = {"POLYGON" : self.__plot_poly, 
-                      "LINESTRING" : self.__plot_linestring,
-                      "POINT" : self.__plot_point}
+        objetos_geom = {"POLYGON" : self.__plot_poly, "LINESTRING" : self.__plot_linestring, "POINT" : self.__plot_point}
 
-        # Extraemos los objetos geométricos de la columna geometry
-        objetos = self.select("geometry").rdd.map(lambda x : (x[0].split('(')[0].upper().strip(), [shapely.wkt.loads(x[0])]))
         # Separamos los objetos por su tipo
         objetos = objetos.reduceByKey(lambda x, y : x+y)
 
