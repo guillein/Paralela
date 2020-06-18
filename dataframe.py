@@ -84,6 +84,7 @@ class DataFrame(PandasMapOpsMixin, PandasConversionMixin):
         # Check whether _repr_html is supported or not, we use it to avoid calling _jdf twice
         # by __repr__ and _repr_html_ while eager evaluation opened.
         self._support_repr_html = False
+        self.esquema = None
 
     @property
     @since(1.3)
