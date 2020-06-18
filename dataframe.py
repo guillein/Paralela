@@ -18,6 +18,12 @@
 import sys
 import random
 
+from pyproj import CRS, Transformer
+import shapely
+from shapely import geometry
+from matplotlib.collections import PatchCollection, LineCollection
+from descartes.patch import PolygonPatch
+    
 if sys.version >= '3':
     basestring = unicode = str
     long = int
@@ -2210,11 +2216,6 @@ class DataFrame(PandasMapOpsMixin, PandasConversionMixin):
     """
     Código propio. @Grupo 3.3
     """
-    from pyproj import CRS, Transformer
-    import shapely
-    from shapely import geometry
-    from matplotlib.collections import PatchCollection, LineCollection
-    from descartes.patch import PolygonPatch
 
     def __setitem__(self, ind, valor):
         # Permitimos la asignación y creación de columnas mediante índices
