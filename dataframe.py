@@ -2278,8 +2278,8 @@ class DataFrame(PandasMapOpsMixin, PandasConversionMixin):
 
         # Comprobamos si se han proporcionado unos ejes
         if not ax:
-        # Separamos los ejes y representamos
-        fig, ax = plt.subplots()
+            # Separamos los ejes y representamos
+            fig, ax = plt.subplots()
 
         # Damos soporte a estas figuras geométricas de Shapely
         objetos_geom = {"POLYGON" : self.__plot_poly, 
