@@ -2221,16 +2221,6 @@ class DataFrame(PandasMapOpsMixin, PandasConversionMixin):
         # Permitimos la asignación y creación de columnas mediante índices
         self.__dict__.update(self.withColumn(ind, valor).__dict__)
 
-    def iloc(self, ind):
-      # Selecciona filas del DF
-      # ind es un objeto slice o int
-
-      # Comprobamos si ind es un objeto Slice...
-        if isinstance(ind, slice):
-            return self.where(col("idx").between(ind.start, ind.stop))
-        else:
-            return self.where(col("idx") == ind)
-
     def rename(self, columns):
         # Cambia el nombre de las columnas. columns es un diccionario
 
