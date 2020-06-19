@@ -2238,7 +2238,7 @@ class DataFrame(PandasMapOpsMixin, PandasConversionMixin):
         nuevo_esquema = []
         
         # Creamos el esquema del DF, si es que no está definido ya
-        self.schema()
+        self.schema
         
         # Para cada columna
         for columna in self._schema.name:
