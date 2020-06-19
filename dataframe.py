@@ -2241,7 +2241,7 @@ class DataFrame(PandasMapOpsMixin, PandasConversionMixin):
         self.schema
         
         # Para cada columna
-        for columna in self._schema.name:
+        for columna in self._schema.names:
             # Comprobamos si se ha definido un nuevo nombre para la columna
             if columna in columns.keys():
                 nuevo_esquema.append(columns[columna])
