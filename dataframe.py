@@ -2313,6 +2313,10 @@ class DataFrame(PandasMapOpsMixin, PandasConversionMixin):
 
         return ax
 
+    """
+    Fin de la extensión
+    """
+    
 def _to_scala_map(sc, jm):
     """
     Convert a dict into a JVM Map.
