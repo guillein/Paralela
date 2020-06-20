@@ -18,13 +18,6 @@
 import sys
 import random
 
-from pyproj import CRS, Transformer
-import shapely
-from shapely import geometry
-from matplotlib.collections import PatchCollection, LineCollection
-from descartes.patch import PolygonPatch
-import matplotlib.pyplot as plt
-    
 if sys.version >= '3':
     basestring = unicode = str
     long = int
@@ -2221,17 +2214,23 @@ class DataFrame(PandasMapOpsMixin, PandasConversionMixin):
         # Permitimos la asignación y creación de columnas mediante índices
         self.__dict__.update(self.withColumn(ind, valor).__dict__)
 
+    def iloc(self, ind):
+      # Selecciona filas del DF
+      # ind es un objeto slice o int
+
+      # Comprobamos si ind es un objeto Slice...
+        if isinstance(ind, slice):
+            return self.where(col("idx").between(ind.start, ind.stop))
+        else:
+            return self.where(col("idx") == ind)
+
     def rename(self, columns):
         # Cambia el nombre de las columnas. columns es un diccionario
 
         # En esta lista guardaremos los nombres de las nuevas columnas en orden
         nuevo_esquema = []
-        
-        # Creamos el esquema del DF, si es que no está definido ya
-        self.schema
-        
-        # Para cada columna
-        for columna in self._schema.names:
+
+        for columna in self.esquema.keys():
             # Comprobamos si se ha definido un nuevo nombre para la columna
             if columna in columns.keys():
                 nuevo_esquema.append(columns[columna])
@@ -2241,61 +2240,38 @@ class DataFrame(PandasMapOpsMixin, PandasConversionMixin):
         # Expandimos la lista y devolvemos un nuevo DF con los nombres de las columnas actualizados
         return self.toDF(*nuevo_esquema)
 
-    def __plot_poly(self, ax, poligonos, color, **kwargs):
+    def __plot_poly(self, ax, poligonos, **kwargs):
         # Método privado para representar polígonos
 
         # Eliminamos los argumentos que no existen en matplotlib
         kwargs = { param : valor for param, valor in kwargs.items() if param != "markersize" }
-        
-        # La añadimos a los ejes
-        if isinstance(color, str):
-            cjto = PatchCollection([PolygonPatch(poli) for poli in poligonos], color = color, **kwargs)
-        elif color != False:
-            # Creamos una colección de polígonos con color
-            cjto = PatchCollection([PolygonPatch(poli) for poli, _ in poligonos], color = [ color for _, color in poligonos], **kwargs)
-        else:
-            # Creamos una colección de polígonos sin coor
-            cjto = PatchCollection([PolygonPatch(poli) for poli in poligonos], **kwargs)
-            
-            
+
+        # Creamos una colección de polígonos
+        cjto = PatchCollection([PolygonPatch(poli) for poli in poligonos], **kwargs)
         # La añadimos a los ejes
         ax.add_collection(cjto, autolim = True) 
     
-    def __plot_point(self, ax, puntos, color, **kwargs):
+    def __plot_point(self, ax, puntos, **kwargs):
         # Método privado para representar puntos
 
         # Reemplazamos markersize por s (tamaño del pincel)
         kwargs = { (param if param != "markersize" else "s") : valor for param, valor in kwargs.items() }
 
         # La añadimos a los ejes
-        if isinstance(color, str):
-            # Un solo color para el plot
-            ax.scatter([p.x for p in puntos], [p.y for p in puntos], color = color, **kwargs)
-        if not isinstance(color, str) and color != False:
-            ax.scatter([p.x for p, _ in puntos], [p.y for p, _ in puntos], color = [c for _, c in puntos], **kwargs)
-        else:
-            ax.scatter([p.x for p in puntos], [p.y for p in puntos], **kwargs)
-            
-    def __plot_linestring(self, ax, lineas, color, **kwargs):
+        ax.scatter([p.x for p in puntos], [p.y for p in puntos], **kwargs)
+    
+    def __plot_linestring(self, ax, lineas, **kwargs):
         # Método privado para representar líneas
 
         # Eliminamos los argumentos que no existen en matplotlib
         kwargs = { param : valor for param, valor in kwargs.items() if param != "markersize" }
-        
-        if isinstance(color, str):
-            # Un solo color para el plot
-            cjto = LineCollection(lineas,  color = color, **kwargs)
-        elif color != False:
-            # Creamos una colección de líneas con color
-            cjto = LineCollection([linea for linea, _ in lineas ], color = [ color for _, color in lineas ], **kwargs)
-        else:
-            # Creamos una colección de líneas sin color
-            cjto = LineCollection(lineas, **kwargs)
-        
+
+        # Creamos una colección de líneas
+        cjto = LineCollection(lineas, **kwargs)
         # La añadimos a los ejes
         ax.add_collection(cjto, autolim=True)
 
-    def plot(self, ax = False, color = False, **kwargs):
+    def plot(self, ax = False, **kwargs):
         # Representa la columna geometry
         # Toma como parámetro opcional el objeto plot sobre el que representar y otros
         # parámetros que se pasan a PatchCollection
@@ -2306,18 +2282,15 @@ class DataFrame(PandasMapOpsMixin, PandasConversionMixin):
             fig, ax = plt.subplots()
 
         # Damos soporte a estas figuras geométricas de Shapely
-        objetos_geom = {"POLYGON" : self.__plot_poly, "LINESTRING" : self.__plot_linestring, "POINT" : self.__plot_point}
+        objetos_geom = {"POLYGON" : self.__plot_poly, 
+                      "LINESTRING" : self.__plot_linestring,
+                      "POINT" : self.__plot_point}
 
-        if not isinstance(color, str) and color != False:
-            # Hay una columna color
-            objetos = self.select("geometry", "color").rdd.map(lambda x : (x["geometry"].split('(')[0].upper().strip(), [(shapely.wkt.loads(x["geometry"]),  x['color'])] ))
-        else:
-            # Extraemos los objetos geométricos de la columna geometry
-            objetos = self.select("geometry").rdd.map(lambda x : (x[0].split('(')[0].upper().strip(), [shapely.wkt.loads(x[0])]))
+        # Extraemos los objetos geométricos de la columna geometry
+        objetos = self.select("geometry").rdd.map(lambda x : (x[0].split('(')[0].upper().strip(), [shapely.wkt.loads(x[0])]))
+        # Separamos los objetos por su tipo
+        objetos = objetos.reduceByKey(lambda x, y : x+y)
 
-            # Separamos los objetos por su tipo
-            objetos = objetos.reduceByKey(lambda x, y : (x+y))
-        
         # Desafortunadamente, no podemos paralelizar esta parte porque una lista de objetos
         # Shapely no es pickable. Por tanto, lo siguiente NO funciona:
         #   objetos.foreach(lambda x : objetos_geom[x[0]](ax, x[1], **kwargs))
@@ -2325,7 +2298,7 @@ class DataFrame(PandasMapOpsMixin, PandasConversionMixin):
         # Por tanto, no nos queda más remedio que recolectar todos los elementos de
         # objetos y representarlos localmente
         for tipo, obj in objetos.collect():
-            objetos_geom[tipo](ax, obj, color, **kwargs)
+            objetos_geom[tipo](ax, obj, **kwargs)
 
         ax.autoscale_view()
         # Pintamos
@@ -2333,10 +2306,6 @@ class DataFrame(PandasMapOpsMixin, PandasConversionMixin):
 
         return ax
 
-    """
-    Fin de la extensión
-    """
-    
 def _to_scala_map(sc, jm):
     """
     Convert a dict into a JVM Map.
