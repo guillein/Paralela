@@ -2268,7 +2268,7 @@ class DataFrame(PandasMapOpsMixin, PandasConversionMixin):
         if isinstance(color, str):
             # Un solo color para el plot
             ax.scatter([p.x for p in puntos], [p.y for p in puntos], c = color, **kwargs)
-        if not isinstance(color, str) and color != False:
+        elif not isinstance(color, str) and color != False:
             ax.scatter([p.x for p, _ in puntos], [p.y for p, _ in puntos], c = [c for _, c in puntos], **kwargs)
         else:
             ax.scatter([p.x for p in puntos], [p.y for p in puntos], **kwargs)
