@@ -2330,8 +2330,8 @@ class DataFrame(PandasMapOpsMixin, PandasConversionMixin):
 
         return ax
     
-    def plot_bar(self, x, ax = None, grosor = 0.35):
-        if ax is None:
+    def plot_bar(self, x, ax = None, fig = None, grosor = 0.35):
+        if ax is None or fig is None:
             # Creamos una figura nueva
             fig, ax = plt.subplots()
 
