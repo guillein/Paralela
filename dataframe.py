@@ -2340,7 +2340,7 @@ class DataFrame(PandasMapOpsMixin, PandasConversionMixin):
         fig, ax = plt.subplots()
         
         # Creamos las posiciones del eje X
-        etiquetas = list(range(self.count()))
+        etiquetas = range(self.count())
         
         # Creamos el esquema del DF, si es que no está definido ya
         self.schema
@@ -2363,10 +2363,10 @@ class DataFrame(PandasMapOpsMixin, PandasConversionMixin):
         if num_barras > 2:
             raise Exception("Máximo dos barras por cada valor de x.")
         elif num_barras == 2:
-            barra1 = ax.bar(etiquetas - grosor/2, datos_repr[nombres_cols[0]], grosor, label = datos_repr[x])
-            barra2 = ax.bar(etiquetas + grosor/2, datos_repr[nombres_cols[1]], grosor, label = datos_repr[x])
+            barra1 = ax.bar([e - grosor/2 for e in etiquetas], datos_repr[nombres_cols[0]], grosor, label = datos_repr[x])
+            barra2 = ax.bar([e + grosor/2 for e in etiquetas], datos_repr[nombres_cols[1]], grosor, label = datos_repr[x])
         elif num_barras == 1:
-            barra = ax.bar(x - grosor/2, datos_repr[nombres_cols[0]], grosor, label = datos_repr[x])
+            barra = ax.bar(list(etiquetas), datos_repr[nombres_cols[0]], grosor, label = datos_repr[x])
         else:
             raise("Debe haber alguna columna que no sea x para representar.")
         
