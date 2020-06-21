@@ -63,7 +63,7 @@ def SPandas(objgpd, especial_trafico = False):
 
   return datos
 
-trafico_medio = SPandas(gpd.read_file('IMDs_2018.shp'), True)
+trafico_medio = SPandas(gpd.read_file('Paralela/IMDs_2018.shp'), True)
 trafico_medio = trafico_medio["IMD", "coord_x", "coord_y", "geometry"]
 # Formateamos la columna IMD, eliminando el carácter de nueva línea
 # y pasando a Int
